@@ -1,0 +1,485 @@
+#!/usr/bin/env ruby
+
+
+#######################################
+#about switching SHOW_FFI :
+#if working with ruby 1.9.1-p376 + gem: ruby-opengl :   
+#read: http://rubygamedev.wordpress.com/2010/04/16/ruby-opengl-on-ruby-1-9/
+#
+#if working with ruby 1.9.2 + gem: ffi-opengl + stil buggy(for me..)
+
+########################################
+
+SHOW_GEARS = false  #to show the original ffi-opengl gears example OR the sokoban game
+                                               
+
+
+
+
+# some undeleted notes from original creator of the original sokoban project:
+##########################################################################
+# 3-D gear wheels. This program is in the public domain.
+#
+# Command line options:
+#    -info      print GL implementation information
+#    -exit      automatically exit after 30 seconds
+#
+# 2005-05-01 Ruby version by Arto Bendiken based on gears.c rev 1.8.
+# 2005-01-09 Original C version (gears.c) by Brian Paul et al.
+# http://cvs.freedesktop.org/mesa/Mesa/progs/demos/gears.c?rev=1.8
+###########################################################################
+
+
+#$:.unshift(File.expand_path(File.join(File.dirname(__FILE__), "..", "lib")))
+#require 'ffi-opengl'
+
+#require './render' 
+
+
+def convertf   args
+  if SHOW_FFI 
+    MemoryPointer.new(:float, 4).put_array_of_float(0,args )  
+  else
+    args
+  end
+end
+
+class Gears
+  attr_accessor :mPOS , :mRED , :mGREEN ,  :mBLUE 
+  #include FFI, GL, GLU, GLUT, Math 
+
+  #include Render
+  #unless  SHOW_GEARS 
+
+
+
+  #end
+
+  #puts 'create Constants for color with ffi pointer array'
+  #POS = MemoryPointer.new(:float, 4).put_array_of_float(0, [5.0, 5.0, 10.0, 0.0])
+  #RED = MemoryPointer.new(:float, 4).put_array_of_float(0, [0.8, 0.1, 0.0, 1.0]) 
+  #GREEN = MemoryPointer.new(:float, 4).put_array_of_float(0, [0.0, 0.8, 0.2, 1.0])
+  #BLUE = MemoryPointer.new(:float, 4).put_array_of_float(0, [0.2, 0.2, 1.0, 1.0]) 
+
+
+  #puts   self.POS
+  #include Math
+
+  # Draw a gear wheel. You'll probably want to call this function when
+  # building a display list since we do a lot of trig here.
+  #
+  # Input:  inner_radius - radius of hole at center
+  #         outer_radius - radius at center of teeth
+  #         width - width of gear
+  #         teeth - number of teeth
+  #         tooth_depth - depth of tooth
+  def gear(inner_radius, outer_radius, width, teeth, tooth_depth)
+    r0 = inner_radius
+    r1 = outer_radius - tooth_depth / 2.0
+    r2 = outer_radius + tooth_depth / 2.0
+
+    da = 2.0 * PI / teeth / 4.0
+
+    glShadeModel(GL_FLAT)
+
+    glNormal3f(0.0, 0.0, 1.0)
+
+    # Draw front face
+    glBegin(GL_QUAD_STRIP)
+    for i in 0..teeth
+      angle = i * 2.0 * PI / teeth
+      glVertex3f(r0 * cos(angle), r0 * sin(angle), width * 0.5)
+      glVertex3f(r1 * cos(angle), r1 * sin(angle), width * 0.5)
+      if i < teeth
+        glVertex3f(r0 * cos(angle), r0 * sin(angle), width * 0.5)
+        glVertex3f(r1 * cos(angle + 3 * da),
+                   r1 * sin(angle + 3 * da), width * 0.5)
+      end
+    end
+    glEnd()
+
+    # Draw front sides of teeth
+    glBegin(GL_QUADS)
+    for i in 0...teeth
+      angle = i * 2.0 * PI / teeth
+      glVertex3f(r1 * cos(angle), r1 * sin(angle), width * 0.5)
+      glVertex3f(r2 * cos(angle + da), r2 * sin(angle + da), width * 0.5)
+      glVertex3f(r2 * cos(angle + 2 * da),
+                 r2 * sin(angle + 2 * da), width * 0.5)
+      glVertex3f(r1 * cos(angle + 3 * da),
+                 r1 * sin(angle + 3 * da), width * 0.5)
+    end
+    glEnd()
+
+    glNormal3f(0.0, 0.0, -1.0)
+
+    # Draw back face
+    glBegin(GL_QUAD_STRIP)
+    for i in 0..teeth
+      angle = i * 2.0 * PI / teeth
+      glVertex3f(r1 * cos(angle), r1 * sin(angle), -width * 0.5)
+      glVertex3f(r0 * cos(angle), r0 * sin(angle), -width * 0.5)
+      if i < teeth
+        glVertex3f(r1 * cos(angle + 3 * da),
+                   r1 * sin(angle + 3 * da), -width * 0.5)
+        glVertex3f(r0 * cos(angle), r0 * sin(angle), -width * 0.5)
+      end
+    end
+    glEnd()
+
+    # Draw back sides of teeth
+    glBegin(GL_QUADS)
+    for i in 0...teeth
+      angle = i * 2.0 * PI / teeth
+      glVertex3f(r1 * cos(angle + 3 * da),
+                 r1 * sin(angle + 3 * da), -width * 0.5)
+      glVertex3f(r2 * cos(angle + 2 * da),
+                 r2 * sin(angle + 2 * da), -width * 0.5)
+      glVertex3f(r2 * cos(angle + da), r2 * sin(angle + da), -width * 0.5)
+      glVertex3f(r1 * cos(angle), r1 * sin(angle), -width * 0.5)
+    end
+    glEnd()
+
+    # Draw outward faces of teeth
+    glBegin(GL_QUAD_STRIP)
+    for i in 0...teeth
+      angle = i * 2.0 * PI / teeth
+      glVertex3f(r1 * cos(angle), r1 * sin(angle), width * 0.5)
+      glVertex3f(r1 * cos(angle), r1 * sin(angle), -width * 0.5)
+      u = r2 * cos(angle + da) - r1 * cos(angle)
+      v = r2 * sin(angle + da) - r1 * sin(angle)
+      len = sqrt(u * u + v * v)
+      u /= len
+      v /= len
+      glNormal3f(v, -u, 0.0)
+      glVertex3f(r2 * cos(angle + da), r2 * sin(angle + da), width * 0.5)
+      glVertex3f(r2 * cos(angle + da), r2 * sin(angle + da), -width * 0.5)
+      glNormal3f(cos(angle), sin(angle), 0.0)
+      glVertex3f(r2 * cos(angle + 2 * da),
+                 r2 * sin(angle + 2 * da), width * 0.5)
+      glVertex3f(r2 * cos(angle + 2 * da),
+                 r2 * sin(angle + 2 * da), -width * 0.5)
+      u = r1 * cos(angle + 3 * da) - r2 * cos(angle + 2 * da)
+      v = r1 * sin(angle + 3 * da) - r2 * sin(angle + 2 * da)
+      glNormal3f(v, -u, 0.0)
+      glVertex3f(r1 * cos(angle + 3 * da),
+                 r1 * sin(angle + 3 * da), width * 0.5)
+      glVertex3f(r1 * cos(angle + 3 * da),
+                 r1 * sin(angle + 3 * da), -width * 0.5)
+      glNormal3f(cos(angle), sin(angle), 0.0)
+    end
+    glVertex3f(r1 * cos(0), r1 * sin(0), width * 0.5)
+    glVertex3f(r1 * cos(0), r1 * sin(0), -width * 0.5)
+    glEnd()
+
+    glShadeModel(GL_SMOOTH)
+
+    # Draw inside radius cylinder
+    glBegin(GL_QUAD_STRIP)
+    for i in 0..teeth
+      angle = i * 2.0 * PI / teeth
+      glNormal3f(-cos(angle), -sin(angle), 0.0)
+      glVertex3f(r0 * cos(angle), r0 * sin(angle), -width * 0.5)
+      glVertex3f(r0 * cos(angle), r0 * sin(angle), width * 0.5)
+    end
+    glEnd()
+  end
+
+  def draw_gears
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glPushMatrix()
+    glRotatef(@view_rotx, 1.0, 0.0, 0.0)
+    glRotatef(@view_roty, 0.0, 1.0, 0.0)
+    glRotatef(@view_rotz, 0.0, 0.0, 1.0)
+
+    glPushMatrix()
+    glTranslatef(-3.0, -2.0, 0.0)
+    glRotatef(@angle, 0.0, 0.0, 1.0)
+    glCallList(@gear1)
+    glPopMatrix()
+
+    glPushMatrix()
+    glTranslatef(3.1, -2.0, 0.0)
+    glRotatef(-2.0 * @angle - 9.0, 0.0, 0.0, 1.0)
+    glCallList(@gear2)
+    glPopMatrix()
+
+    glPushMatrix()
+    glTranslatef(-3.1, 4.2, 0.0)
+    glRotatef(-2.0 * @angle - 25.0, 0.0, 0.0, 1.0)
+    glCallList(@gear3)
+    glPopMatrix()
+
+    glPopMatrix()
+
+    glutSwapBuffers()
+
+    @frames = 0 if not defined? @frames
+    @t0 = 0 if not defined? @t0
+
+    @frames += 1
+    t = glutGet(GLUT_ELAPSED_TIME)
+    if t - @t0 >= 5000
+      seconds = (t - @t0) / 1000.0
+      fps = @frames / seconds
+      printf("%d frames in %6.3f seconds = %6.3f FPS\n",
+             @frames, seconds, fps)
+      @t0, @frames = t, 0
+      exit if defined? @autoexit and t >= 999.0 * @autoexit
+    end
+  end
+
+  def idle
+    t = glutGet(GLUT_ELAPSED_TIME) / 1000.0
+    @t0_idle = t if !defined? @t0_idle
+    # 90 degrees per second
+    @angle += 70.0 * (t - @t0_idle)
+    @t0_idle = t
+    glutPostRedisplay()
+  end
+
+  # Change view angle, exit upon ESC
+  def key(k, x, y)
+    case k
+    when ?z
+      @view_rotz += 5.0
+    when ?Z
+      @view_rotz -= 5.0
+    when 27 # Escape
+      exit
+    end
+    glutPostRedisplay()
+  end
+
+  # Change view angle
+  def special(k, x, y)
+    case k
+    when GLUT_KEY_UP
+      @view_rotx += 5.0
+    when GLUT_KEY_DOWN
+      @view_rotx -= 5.0
+    when GLUT_KEY_LEFT
+      @view_roty += 5.0
+    when GLUT_KEY_RIGHT
+      @view_roty -= 5.0
+    end
+    glutPostRedisplay()
+  end
+
+  # New window size or exposure
+  def reshape_gears(width, height)
+
+    h = height.to_f / width.to_f
+    glViewport(0, 0, width, height)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    glFrustum(-1.0, 1.0, -h, h, 5.0, 60.0)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+    glTranslatef(0.0, 0.0, -40.0)
+  end
+  def enable_light_for_gears
+    puts '@mPOS'
+    puts @mPOS
+
+    glLightfv(GL_LIGHT0, GL_POSITION, @mPOS)
+    glEnable(GL_CULL_FACE)
+    glEnable(GL_LIGHTING)
+    glEnable(GL_LIGHT0)
+    glEnable(GL_DEPTH_TEST)
+
+  end   
+  def init_gears
+    
+    @angle = 0.0
+    @view_rotx, @view_roty, @view_rotz = 20.0, 30.0, 0.0
+
+
+    # Make the gears
+    @gear1 = glGenLists(1)
+    glNewList(@gear1, GL_COMPILE)
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,@mRED)
+    gear(1.0, 4.0, 1.0, 20, 0.7)
+    glEndList()
+
+    @gear2 = glGenLists(1)
+    glNewList(@gear2, GL_COMPILE)
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, @mGREEN)
+    gear(0.5, 2.0, 2.0, 10, 0.7)
+    glEndList()
+
+    @gear3 = glGenLists(1)
+    glNewList(@gear3, GL_COMPILE)
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, @mBLUE)
+    gear(1.3, 2.0, 0.5, 10, 0.7)
+    glEndList()
+
+    glEnable(GL_NORMALIZE)
+
+    ARGV.each do |arg|
+      case arg
+      when '-info'
+        printf("GL_RENDERER   = %s\n", glGetString(GL_RENDERER))
+        printf("GL_VERSION    = %s\n", glGetString(GL_VERSION))
+        printf("GL_VENDOR     = %s\n", glGetString(GL_VENDOR))
+        printf("GL_EXTENSIONS = %s\n", glGetString(GL_EXTENSIONS))
+      when '-exit'
+        @autoexit = 30
+        printf("Auto Exit after %i seconds.\n", @autoexit);
+      end
+    end
+  end
+
+  def visible(vis)
+    glutIdleFunc((vis == GLUT_VISIBLE ? method(:idle).to_proc : nil))
+  end
+
+  def mouse(button, state, x, y)
+    @mouse = state
+    @x0, @y0 = x, y
+  end
+
+  def motion(x, y)
+    if @mouse == GLUT_DOWN then
+      @view_roty += @x0 - x
+      @view_rotx += @y0 - y
+    end
+    @x0, @y0 = x, y
+  end
+
+
+  def glut_init
+    if SHOW_FFI
+      glutInit(MemoryPointer.new(:int, 1).put_int(0, 0), 
+               MemoryPointer.new(:pointer, 1).put_pointer(0, nil))    
+    else
+      glutInit
+
+    end
+  end
+
+
+  def initialize
+    #POS =   @mPOS
+    #RED = @mRED
+    #GREEN = @mGREEN
+    #BLUE    = @mBLUE     
+
+    puts 'initialize() call glut_init ::  init_soko|no gears equivalent '
+    glut_init
+    # argc, argv parameters
+
+    puts 'initialize() set DisplayMode'
+    if SHOW_GEARS
+
+
+      glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE)
+    else
+
+glutInitDisplayMode GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH
+
+      #glutInitDisplayMode  GLUT_DOUBLE | GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH   
+     Sokoban1::Render.init_soko
+    end
+
+
+
+    glutInitWindowPosition(0, 0)
+    glutInitWindowSize(300, 300)
+
+
+
+
+  end
+
+  def register_glut_with_gears
+    glutDisplayFunc(method(:draw_gears).to_proc)
+
+    glutReshapeFunc(method(:reshape_gears).to_proc)
+    glutKeyboardFunc(method(:key).to_proc)
+    glutSpecialFunc(method(:special).to_proc)
+    glutVisibilityFunc(method(:visible).to_proc)
+    glutMouseFunc(method(:mouse).to_proc)
+    glutMotionFunc(method(:motion).to_proc)   
+  end
+  def start
+
+
+    puts 'start() enable lights'
+    puts 'start() register glut with methods'
+    if SHOW_GEARS           
+
+      glutCreateWindow('Gears')
+      enable_light_for_gears
+      init_gears
+
+      register_glut_with_gears
+    else       
+      init_gears
+      glutCreateWindow('SokoBan')
+     Sokoban1::Render.enable_light_soko
+      Sokoban1::Render.register_glut_with_soko
+    end       
+    glutMainLoop()
+  end
+
+end
+
+#Gears.new.start
+
+#puts 'initialize() call init_soko , glut_init'
+#puts 'start() set DisplayMode'
+#puts 'start() enable lights'
+#puts 'start() register glut with methods'
+if __FILE__ == $0
+
+   
+
+require File.dirname(__FILE__) + '/../lib/sokobanrb'
+#include Config1
+      puts 'SHOW FFI?'             
+  Sokoban1::Config.detect
+  
+  if Sokoban1::Config.show_ffi
+    #$:.unshift(File.expand_path(File.join(File.dirname(__FILE__), "..", "lib")))
+    SHOW_FFI = true
+    gem 'ffi-opengl'
+    require 'ffi-opengl' 
+    include FFI       
+    puts true
+  else
+    SHOW_FFI = false
+    require 'opengl'        
+    puts false
+  end
+
+
+
+
+
+
+
+
+  include GL, GLU, GLUT
+  include Math 
+  #include Render
+
+
+  app = Gears.new
+
+  #app = Soko.new
+  #app.light_diffuse = MemoryPointer.new(:float, 4).put_array_of_float(0, [1.0, 1.0, 1.0, 1.0])
+  #app.light_position = MemoryPointer.new(:float, 4).put_array_of_float(0, [1.0, 1.0, 1.0, 0.0])
+
+  puts 'create Constants for color with ffi pointer array'
+  app.mPOS =  convertf( [5.0, 5.0, 10.0, 0.0] )
+  app.mRED =  convertf( [0.8, 0.1, 0.0, 1.0] )
+  app.mGREEN = convertf( [0.0, 0.8, 0.2, 1.0])
+  app.mBLUE = convertf ([0.2, 0.2, 1.0, 1.0]) 
+
+
+  #app.init_ffi
+  app.start
+end
+

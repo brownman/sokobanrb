@@ -1,0 +1,39 @@
+
+about using opengl with different versions of Ruby:
+#######################################
+#ruby 1.9.1 :
+#gem : ruby-opengl
+#
+#if working with ruby 1.9.1-p376 + gem: ruby-opengl :   
+#read: http://rubygamedev.wordpress.com/2010/04/16/ruby-opengl-on-ruby-1-9/
+#
+# ruby 1.9.2 :
+# gem: ffi-opengl 
+########################################
+
+                                               
+
+
+1.to play: run bin/sokoban 
+2.
+keys:
+----
+as arrows: 
+##u##
+#hjk#
+
+quit : press esc or  q 
+
+
+next to implement:
+-----------------
+1.console game
+2.console game with colors
+3.testing
+4.using ruby 1.9.2 with gosu opengl
+5.add optional prespective - user camera (fps view)
+6.moving project to mvc stracture
+7.draw only require cells
+
+done:
+use displaylist for faster drawing
