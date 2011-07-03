@@ -14,9 +14,9 @@ the benefits:
 after one build his game which is most commonly interface with only one environment,
 he has the game engine! which is the big fish.
 
-..with some little extra work, he should be able to build another interface for it.
+..with some little extra work, he/she should be able to build another interface for it.
 
-- one shouldn't be familiar with opengl for succeeding with building an opengl interface for his game - because there will be minor changes he will have to do to the built-in framework examples.
+- one shouldn't be familiar with opengl for succeeding with building an opengl interface for his/her game - because there will be minor changes to make, when using the built-in framework examples.
 
 
 
