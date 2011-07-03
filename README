@@ -1,39 +1,57 @@
 
+
+project goals: 
+to build a game framework dedicates for porting an existed game for enother environment.
+
+possible interfaces:
+opengl /console / web(rails) 
+
+possible workflow:
+the first step will be to MVC-ing your game.
+the second step will be to build another interface for it (consider using one of the examples:sokoban, tictactoe , etc.. ).
+
+the benefits:
+after one build his game which is most commonly interface with only one environment,
+he has the game engine! which is the big fish.
+
+..with some little extra work, he should be able to build another interface for it.
+
+- one shouldn't be familiar with opengl for succeeding with building an opengl interface for his game - because there will be minor changes he will have to do to the built-in framework examples.
+
+
+
+
+
+
+
+opengl?
+-------
 about using opengl with different versions of Ruby:
 #######################################
-#ruby 1.9.1 :
-#gem : ruby-opengl
+#if ruby 1.9.1 :
+#install the gem : ruby-opengl
 #
-#if working with ruby 1.9.1-p376 + gem: ruby-opengl :   
+#got problems?   
 #read: http://rubygamedev.wordpress.com/2010/04/16/ruby-opengl-on-ruby-1-9/
-#
-# ruby 1.9.2 :
-# gem: ffi-opengl 
+
+
+#if ruby 1.9.2 :
+#install the gem: ffi-opengl 
 ########################################
 
                                                
-
-
-1.to play: run bin/sokoban 
-2.
-keys:
-----
+framework examples:
+------------------------
+to play the game: sokoban
+1. run the framework with:
+bin/openglit sokoban 
+2. keys:
 as arrows: 
 ##u##
 #hjk#
+to quit: press esc or  q 
+                          
 
-quit : press esc or  q 
 
-
-next to implement:
------------------
-1.console game
-2.console game with colors
-3.testing
-4.using ruby 1.9.2 with gosu opengl
-5.add optional prespective - user camera (fps view)
-6.moving project to mvc stracture
-7.draw only require cells
-
-done:
-use displaylist for faster drawing
+DISCLAIMER:
+work is in progress !

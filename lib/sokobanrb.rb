@@ -1,10 +1,10 @@
 $: << File.dirname(__FILE__)
 
-#require 'set'
+require 'set'
 
-require 'sokoban/game_engine'
-require 'sokoban/render'
-require 'sokoban/config'
+require 'sokobanrb/game_engine'
+require 'sokobanrb/render'
+#require 'sokobanrb/config'
 
                      
 

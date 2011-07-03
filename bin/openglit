@@ -10,8 +10,8 @@
 
 ########################################
 
-SHOW_GEARS = false  #to show the original ffi-opengl gears example OR the sokoban game
-                                               
+
+
 
 
 
@@ -44,12 +44,12 @@ def convertf   args
   end
 end
 
-class Gears
+class OpenglIt
   attr_accessor :mPOS , :mRED , :mGREEN ,  :mBLUE 
   #include FFI, GL, GLU, GLUT, Math 
 
   #include Render
-  #unless  SHOW_GEARS 
+  #unless  SHOW_GAME 
 
 
 
@@ -291,7 +291,7 @@ class Gears
 
   end   
   def init_gears
-    
+
     @angle = 0.0
     @view_rotx, @view_roty, @view_rotz = 20.0, 30.0, 0.0
 
@@ -371,16 +371,22 @@ class Gears
     # argc, argv parameters
 
     puts 'initialize() set DisplayMode'
-    if SHOW_GEARS
-
-
+    if SHOW_GAME == :gears
       glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE)
-    else
+    elsif SHOW_GAME == :sokoban
 
-glutInitDisplayMode GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH
+      glutInitDisplayMode GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH
 
       #glutInitDisplayMode  GLUT_DOUBLE | GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH   
-     Sokoban1::Render.init_soko
+      Sokoban1::Render.init_soko      
+    elsif SHOW_GAME == :tictactien
+
+      glutInitDisplayMode GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH
+
+      #glutInitDisplayMode  GLUT_DOUBLE | GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH   
+      Tictactien1::Render.init_tictac      
+    else
+
     end
 
 
@@ -408,18 +414,25 @@ glutInitDisplayMode GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH
 
     puts 'start() enable lights'
     puts 'start() register glut with methods'
-    if SHOW_GEARS           
+    if SHOW_GAME  == :gears         
 
       glutCreateWindow('Gears')
       enable_light_for_gears
       init_gears
 
       register_glut_with_gears
-    else       
-      init_gears
+    elsif SHOW_GAME == :sokoban       
+      #init_gears
       glutCreateWindow('SokoBan')
-     Sokoban1::Render.enable_light_soko
+      Sokoban1::Render.enable_light_soko
       Sokoban1::Render.register_glut_with_soko
+    elsif SHOW_GAME == :tictactien
+      glutCreateWindow('TicTacTien')
+      Tictactien1::Render.enable_light_tictac
+      Tictactien1::Render.register_glut_with_tictac        
+    else
+      puts 'no such game name'
+      exit
     end       
     glutMainLoop()
   end
@@ -434,14 +447,17 @@ end
 #puts 'start() register glut with methods'
 if __FILE__ == $0
 
-   
 
-require File.dirname(__FILE__) + '/../lib/sokobanrb'
-#include Config1
-      puts 'SHOW FFI?'             
-  Sokoban1::Config.detect
-  
-  if Sokoban1::Config.show_ffi
+
+
+  require File.dirname(__FILE__) + '/../config/config'
+
+  #include Config1
+  puts 'SHOW FFI?'             
+
+  Configure::Config.detect
+
+  if Configure::Config.show_ffi
     #$:.unshift(File.expand_path(File.join(File.dirname(__FILE__), "..", "lib")))
     SHOW_FFI = true
     gem 'ffi-opengl'
@@ -455,8 +471,26 @@ require File.dirname(__FILE__) + '/../lib/sokobanrb'
   end
 
 
+  puts 'ARGV'
+  puts ARGV
 
 
+  Configure::Config.start
+  Configure::Config.update ARGV[0]   if !ARGV.empty?
+
+
+  SHOW_GAME = Configure::Config.show_game 
+ puts 'game to play:'
+ puts SHOW_GAME
+  if SHOW_GAME == :sokoban
+    require File.dirname(__FILE__) + '/../lib/sokobanrb'
+  elsif SHOW_GAME == :tictactien
+    require File.dirname(__FILE__) + '/../lib/tictactien'
+  else
+    puts 'i guess: no model game is required !'
+  end
+
+  #to show the original ffi-opengl gears example OR the sokoban game
 
 
 
@@ -466,18 +500,18 @@ require File.dirname(__FILE__) + '/../lib/sokobanrb'
   #include Render
 
 
-  app = Gears.new
+  app = OpenglIt.new
 
   #app = Soko.new
   #app.light_diffuse = MemoryPointer.new(:float, 4).put_array_of_float(0, [1.0, 1.0, 1.0, 1.0])
   #app.light_position = MemoryPointer.new(:float, 4).put_array_of_float(0, [1.0, 1.0, 1.0, 0.0])
-
+  if SHOW_GAME == :gears
   puts 'create Constants for color with ffi pointer array'
   app.mPOS =  convertf( [5.0, 5.0, 10.0, 0.0] )
   app.mRED =  convertf( [0.8, 0.1, 0.0, 1.0] )
   app.mGREEN = convertf( [0.0, 0.8, 0.2, 1.0])
   app.mBLUE = convertf ([0.2, 0.2, 1.0, 1.0]) 
-
+  end
 
   #app.init_ffi
   app.start

@@ -1,5 +1,5 @@
-require File.dirname(__FILE__) + '/../spec_helper'
-
+#require File.dirname(__FILE__) + '/../spec_helper'
+require 'spec_helper'
 #describe String do
 #it "should wrap text at white space when over a specific character length" do
 #"foo bar blah".hard_wrap(10).should == "foo bar\nblah"
@@ -34,7 +34,10 @@ describe Sokoban1::Sokoban do
     MAP
   end
 
-
+ it 'should draw only the changed cell' do
+   
+ end
+ 
  it 'should set game charecter with a char' do
     Sokoban1::Sokoban::CRATE.should == 'o'
  end

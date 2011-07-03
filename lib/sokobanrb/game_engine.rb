@@ -32,6 +32,7 @@ class Sokoban
   end
 
   def initialize( file = File.join(PATH, "sokoban_levels.txt") )
+    puts 'new sokoban instance - load level from .txt file'
     @level_file = file
 
     @board = [ ]

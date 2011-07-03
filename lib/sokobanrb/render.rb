@@ -288,9 +288,16 @@ module Sokoban1
       end
 
 
-
+      def know_to_draw
+       str_screen = @game.display 
+       result = str_screen
+       
+       #.map {|all,j| str_screen[j] unless all.include str_screen[j]}
+       result
+      end
 
       def display2 
+
         #= lambda do
         puts 'render::display2() glClear (..)'
         glClear GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
@@ -347,9 +354,10 @@ module Sokoban1
 
       end
       def init_soko
+        
 
         puts 'render think: SHOW_FFI is:'
-        puts SHOW_FFI
+        #puts SHOW_FFI
 
         @game = Sokoban.new
       end
